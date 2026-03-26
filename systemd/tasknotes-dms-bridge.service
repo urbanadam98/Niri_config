@@ -1,0 +1,13 @@
+[Unit]
+Description=TaskNotes → DMS Pomodoro bridge
+After=graphical-session.target
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+[Service]
+ExecStart=/home/au/.local/bin/tasknotes-dms-bridge
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

@@ -275,9 +275,12 @@ layout {
 // spawn-at-startup "waybar"
 
 spawn-at-startup "swayidle" "-w" "timeout" "300" "dms ipc lock lock" "timeout" "330" "niri msg action power-off-monitors" "before-sleep" "dms ipc lock lock" "lock" "dms ipc lock lock"
+spawn-at-startup "vicinae" "server"
 
 // To run a shell command (with variables, pipes, etc.), use spawn-sh-at-startup:
 // spawn-sh-at-startup "qs -c ~/source/qs/MyAwesomeShell"
+
+workspace "browser"
 
 hotkey-overlay {
     // Uncomment this line to disable the "Important Hotkeys" pop-up at startup.
@@ -333,6 +336,12 @@ window-rule {
     open-floating true
 }
 
+// Open Firefox on workspace 2 (named "browser").
+window-rule {
+    match app-id=r#"firefox$"#
+    open-on-workspace "browser"
+}
+
 // Draw focus ring around windows, not behind them (preserves transparency).
 window-rule {
     draw-border-with-background false
@@ -376,6 +385,7 @@ binds {
     Mod+B hotkey-overlay-title="Open Browser: firefox" { spawn "firefox"; }
     Mod+E hotkey-overlay-title="Open File Manager: dolphin" { spawn "dolphin"; }
     Mod+D hotkey-overlay-title="Run an Application: fuzzel" { spawn "fuzzel"; }
+    Mod+N hotkey-overlay-title="Open Obsidian" { spawn "/home/au/.local/bin/obsidian"; }
     Super+Alt+L hotkey-overlay-title="Lock the Screen" { spawn "loginctl" "lock-session"; }
 
     // Use spawn-sh to run a shell command. Do this if you need pipes, multiple commands, etc.
@@ -610,6 +620,8 @@ binds {
     // since it will switch twice upon pressing the hotkey (once by xkb, once by niri).
     // Mod+Space       { switch-layout "next"; }
     // Mod+Shift+Space { switch-layout "prev"; }
+
+    Mod+Space repeat=false { spawn "vicinae" "toggle"; }
 
     Print { screenshot; }
     Ctrl+Print { screenshot-screen; }

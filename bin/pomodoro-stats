@@ -1,0 +1,109 @@
+#!/usr/bin/env python3
+"""Pomodoro statistics visualizer — reads DankMaterialShell plugin state."""
+
+import json
+import sys
+from collections import defaultdict
+from datetime import date, timedelta
+from pathlib import Path
+
+DATA_FILE = Path.home() / ".local/state/DankMaterialShell/plugins/dankPomodoroTimer_state.json"
+BAR_CHAR = "█"
+BAR_MAX_WIDTH = 30
+TOMATO = "🍅"
+
+
+def load_data() -> dict[date, int]:
+    if not DATA_FILE.exists():
+        print(f"Soubor nenalezen: {DATA_FILE}")
+        sys.exit(1)
+    raw = json.loads(DATA_FILE.read_text())
+    result = {}
+    for key, value in raw.items():
+        if key.startswith("completedPomodoros-"):
+            day_str = key.removeprefix("completedPomodoros-")
+            try:
+                result[date.fromisoformat(day_str)] = int(value)
+            except ValueError:
+                pass
+    return result
+
+
+def bar(count: int, max_count: int) -> str:
+    if max_count == 0:
+        return ""
+    width = round(count / max_count * BAR_MAX_WIDTH)
+    return BAR_CHAR * width
+
+
+def print_daily(data: dict[date, int], year: int, month: int) -> None:
+    days = {d: v for d, v in data.items() if d.year == year and d.month == month}
+    if not days:
+        print("  Žádná data pro tento měsíc.")
+        return
+
+    # Fill all days of the month up to today
+    first = date(year, month, 1)
+    last = min(date.today(), date(year, month + 1, 1) - timedelta(days=1)) if month < 12 else min(date.today(), date(year, 12, 31))
+    all_days = [first + timedelta(days=i) for i in range((last - first).days + 1)]
+
+    max_count = max(days.values(), default=1)
+    total = sum(days.values())
+
+    print(f"\n  Denní přehled — {year}/{month:02d}\n")
+    for d in all_days:
+        count = days.get(d, 0)
+        b = bar(count, max_count)
+        tomatoes = TOMATO * count if count <= 10 else TOMATO * 10 + f"+{count-10}"
+        marker = " ◀ dnes" if d == date.today() else ""
+        print(f"  {d.strftime('%a %d')}  {b:<{BAR_MAX_WIDTH}}  {count:2d} {tomatoes}{marker}")
+
+    print(f"\n  Celkem: {total} pomodoro v tomto měsíci")
+
+
+def print_monthly(data: dict[date, int]) -> None:
+    if not data:
+        print("  Žádná data.")
+        return
+
+    monthly: dict[tuple[int, int], int] = defaultdict(int)
+    for d, count in data.items():
+        monthly[(d.year, d.month)] += count
+
+    max_count = max(monthly.values(), default=1)
+    total = sum(monthly.values())
+
+    print(f"\n  Měsíční přehled\n")
+    for (y, m), count in sorted(monthly.items()):
+        b = bar(count, max_count)
+        print(f"  {y}/{m:02d}  {b:<{BAR_MAX_WIDTH}}  {count:3d} {TOMATO}")
+
+    print(f"\n  Celkem všech dob: {total} pomodoro")
+
+
+def main() -> None:
+    data = load_data()
+
+    args = sys.argv[1:]
+    today = date.today()
+
+    if "--all" in args or "-a" in args:
+        print_monthly(data)
+        print()
+        # Also show current month detail
+        print_daily(data, today.year, today.month)
+    elif len(args) >= 2:
+        try:
+            year, month = int(args[0]), int(args[1])
+            print_daily(data, year, month)
+        except ValueError:
+            print("Použití: pomodoro-stats [rok měsíc] | [-a/--all]")
+    else:
+        # Default: current month
+        print_daily(data, today.year, today.month)
+        print()
+        print_monthly(data)
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,90 @@
+#!/usr/bin/env python3
+"""TaskNotes → DMS Pomodoro bridge (polling).
+
+Každou sekundu se ptá TaskNotes REST API na stav pomodoro.
+Při změně stavu zavolá odpovídající DMS IPC příkaz.
+"""
+
+import json
+import logging
+import subprocess
+import sys
+import time
+import urllib.request
+from urllib.error import URLError
+
+API_STATUS = "http://localhost:8181/api/pomodoro/status"
+POLL_INTERVAL = 2  # sekundy
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s", stream=sys.stdout)
+
+DMS_START = {
+    "work":        ["dms", "ipc", "pomodoroTimer", "startWork"],
+    "short-break": ["dms", "ipc", "pomodoroTimer", "startShortBreak"],
+    "long-break":  ["dms", "ipc", "pomodoroTimer", "startLongBreak"],
+}
+
+
+def get_status() -> dict | None:
+    try:
+        with urllib.request.urlopen(API_STATUS, timeout=2) as r:
+            return json.loads(r.read())["data"]
+    except (URLError, KeyError, json.JSONDecodeError):
+        return None
+
+
+def dms_available() -> bool:
+    """Zkontroluje zda DMS proces běží — bez volání dms ipc."""
+    result = subprocess.run(["pgrep", "-x", "dms"], capture_output=True)
+    return result.returncode == 0
+
+
+def dms(cmd: list[str]) -> None:
+    if not dms_available():
+        logging.warning("DMS proces neběží, přeskakuji: %s", cmd[3])
+        return
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    stderr = result.stderr.strip()
+    if result.returncode != 0 or "Error" in stderr:
+        logging.warning("DMS chyba (%s): %s", cmd[3], stderr)
+    else:
+        logging.info("DMS: %s → %s", cmd[3], result.stdout.strip() or "ok")
+
+
+def main():
+    logging.info("TaskNotes→DMS bridge spuštěn (polling každých %ds)", POLL_INTERVAL)
+    prev_running = False
+    prev_type = None
+
+    while True:
+        status = get_status()
+        if status is None:
+            time.sleep(POLL_INTERVAL)
+            continue
+
+        is_running: bool = status.get("isRunning", False)
+        session = status.get("currentSession") or {}
+        session_type: str = session.get("type", "work")
+
+        # Detekce startu: přechod z idle → running nebo změna typu
+        if is_running and (not prev_running or session_type != prev_type):
+            cmd = DMS_START.get(session_type, DMS_START["work"])
+            logging.info("TaskNotes start: %s", session_type)
+            dms(cmd)
+
+        # Detekce přerušení: přechod z running → idle (bez dokončení)
+        elif not is_running and prev_running:
+            logging.info("TaskNotes stop/interrupt")
+            dms(["dms", "ipc", "pomodoroTimer", "resetTimer"])
+
+        prev_running = is_running
+        prev_type = session_type if is_running else None
+        time.sleep(POLL_INTERVAL)
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except KeyboardInterrupt:
+        logging.info("Ukončeno.")
+        sys.exit(0)
