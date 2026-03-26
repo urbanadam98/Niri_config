@@ -5,7 +5,7 @@ StartLimitIntervalSec=60
 StartLimitBurst=5
 
 [Service]
-ExecStart=/home/au/.local/bin/tasknotes-dms-bridge
+ExecStart=%h/.local/bin/tasknotes-dms-bridge
 Restart=on-failure
 RestartSec=5
 
