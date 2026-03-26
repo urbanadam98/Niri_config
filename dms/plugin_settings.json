@@ -1,0 +1,18 @@
+{
+  "dankPomodoroTimer": {
+    "enabled": true
+  },
+  "dankHyprlandWindows": {
+    "enabled": true,
+    "trigger": "§"
+  },
+  "dankKDEConnect": {
+    "enabled": true
+  },
+  "cavaVisualizer": {
+    "enabled": true
+  },
+  "dmsLenovoBatterySettings": {
+    "enabled": true
+  }
+}
