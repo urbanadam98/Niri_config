@@ -1,0 +1,11 @@
+{
+	"Calendars": [
+		{
+			"Url": "https://www.google.com/calendar/dav/YOUR_EMAIL@gmail.com/events/",
+			"Username": "YOUR_EMAIL@gmail.com",
+			"Password": "YOUR_APP_PASSWORD"
+		}
+	],
+	"Timezone": "Europe/Prague",
+	"DefaultNumDays": 7
+}
