@@ -1,6 +1,6 @@
 {
-  "currentThemeName": "custom",
-  "currentThemeCategory": "registry",
+  "currentThemeName": "dynamic",
+  "currentThemeCategory": "dynamic",
   "customThemeFile": "/home/urbana/.config/DankMaterialShell/themes/flexoki/theme.json",
   "registryThemeVariants": {
     "catppuccin": {
@@ -9,7 +9,7 @@
         "accent": "mauve"
       }
     },
-    "flexoki": "magenta",
+    "flexoki": "blue",
     "peaceAndQuiet": "lavender"
   },
   "matugenScheme": "scheme-tonal-spot",
@@ -297,7 +297,7 @@
   "matugenTemplateKcolorscheme": true,
   "matugenTemplateVscode": true,
   "matugenTemplateEmacs": true,
-  "matugenTemplateZed": true,
+  "matugenTemplateZed": false,
   "showDock": true,
   "dockAutoHide": false,
   "dockSmartAutoHide": true,
