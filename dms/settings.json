@@ -1,7 +1,7 @@
 {
   "currentThemeName": "custom",
   "currentThemeCategory": "registry",
-  "customThemeFile": "/home/au/.config/DankMaterialShell/themes/flexoki/theme.json",
+  "customThemeFile": "/home/urbana/.config/DankMaterialShell/themes/flexoki/theme.json",
   "registryThemeVariants": {
     "catppuccin": {
       "dark": {
@@ -9,7 +9,7 @@
         "accent": "mauve"
       }
     },
-    "flexoki": "purple",
+    "flexoki": "magenta",
     "peaceAndQuiet": "lavender"
   },
   "matugenScheme": "scheme-tonal-spot",
@@ -392,7 +392,7 @@
   "updaterUseCustomCommand": false,
   "updaterCustomCommand": "",
   "updaterTerminalAdditionalParams": "",
-  "displayNameMode": "system",
+  "displayNameMode": "model",
   "screenPreferences": {},
   "showOnLastDisplay": {},
   "niriOutputSettings": {},
@@ -423,6 +423,10 @@
         "weather",
         {
           "id": "dankPomodoroTimer",
+          "enabled": true
+        },
+        {
+          "id": "qcalCalendar",
           "enabled": true
         }
       ],
